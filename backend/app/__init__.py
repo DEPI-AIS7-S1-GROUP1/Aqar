@@ -1,0 +1,1 @@
+"""Aqar backend application package."""
