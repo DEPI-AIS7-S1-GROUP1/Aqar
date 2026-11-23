@@ -29,6 +29,10 @@ ENV/
 env/
 .venv
 
+# Node / Next.js
+node_modules/
+.next/
+
 # IDE
 .vscode/
 .idea/
