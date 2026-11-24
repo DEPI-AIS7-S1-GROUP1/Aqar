@@ -1,0 +1,17 @@
+{
+  "source_url": "https://example.com/property/123",
+  "collected_at": "2026-11-20T10:15:00",
+  "collected_by": "Member 1",
+  "verified_by": null,
+  "area": "القاهرة الجديدة",
+  "developer": "Talaat Moustafa Group (TMG)",
+  "price_egp": 1500000.0,
+  "area_sqm": 120.0,
+  "delivery_date": null,
+  "down_payment_pct": 10.0,
+  "years": 10,
+  "frequency": "monthly",
+  "delivery_payment_pct": null,
+  "maintenance_pct": null,
+  "notes": "مثال خياري للعرض"
+}

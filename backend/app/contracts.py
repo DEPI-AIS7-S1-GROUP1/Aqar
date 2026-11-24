@@ -151,3 +151,51 @@ class LeadBrief(BaseModel):
     open_questions: list[str] = []
     summary_text: str | None = None             # 60-80 words, checked by the honesty rule
     transcript_url: str | None = None
+
+# ---- listing and search models (Member 3) ----
+"""Pydantic models for property listings and payment plans.
+All optional fields default to ``None``; unknown values must be ``None`` (never ``0``).
+"""
+
+from datetime import date
+from typing import List, Literal, Optional
+
+from pydantic import BaseModel, Field
+
+# NOTE: optional fields default to None; never use 0 for unknown values.
+
+class Listing(BaseModel):
+    source_url: str
+    collected_at: datetime
+    collected_by: str
+    verified_by: Optional[str] = None
+    area: str
+    developer: str
+    price_egp: float
+    area_sqm: float
+    delivery_date: Optional[date] = None
+    down_payment_pct: float
+    years: int
+    frequency: Literal["monthly", "quarterly"]
+    delivery_payment_pct: Optional[float] = None
+    maintenance_pct: Optional[float] = None
+    notes: Optional[str] = None
+
+class PaymentPlan(BaseModel):
+    down_payment_pct: float
+    years: int
+    frequency: Literal["monthly", "quarterly"]
+    delivery_payment_pct: Optional[float] = None
+    maintenance_pct: Optional[float] = None
+
+class SearchQuery(BaseModel):
+    area: Optional[str] = None
+    developer: Optional[str] = None
+    min_price_egp: Optional[float] = None
+    max_price_egp: Optional[float] = None
+    frequency: Optional[Literal["monthly", "quarterly"]] = None
+
+class SearchResult(BaseModel):
+    total: int
+    results: List[Listing]
+
