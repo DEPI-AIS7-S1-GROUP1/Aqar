@@ -1,7 +1,14 @@
+import fs from "fs";
+import path from "path";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function HomePage() {
+  const hasJpg = fs.existsSync(
+    path.join(process.cwd(), "public", "hero-building.jpg")
+  );
+  const heroImageSrc = hasJpg ? "/hero-building.jpg" : "/hero-building.svg";
+
   return (
     <div className="relative min-h-screen bg-ink text-paper flex flex-col justify-between overflow-hidden select-none">
       {/* Giant faint Arabic word behind everything */}
@@ -142,16 +149,25 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* Building drawing: bottom-left, absolute, width 780px (max 62%) */}
-      <div className="pointer-events-none absolute bottom-0 left-0 w-[320px] sm:w-[520px] lg:w-[780px] max-w-[62%] z-0 select-none animate-building-drift opacity-85 lg:opacity-100">
-        <Image
-          src="/hero-building.svg"
-          alt="رسم مبنى معاصر"
-          width={780}
-          height={550}
-          className="w-full h-auto object-contain"
-          priority
-        />
+      {/* Hero building image: visual side (left in RTL), absolute, ~780px wide (max 62%) */}
+      <div className="pointer-events-none absolute bottom-0 left-0 w-[300px] sm:w-[500px] lg:w-[780px] max-w-[62%] z-0 select-none animate-building-drift opacity-25 sm:opacity-40 lg:opacity-100 transition-opacity duration-300">
+        <div className="relative w-full h-auto overflow-hidden rounded-2xl">
+          <Image
+            src={heroImageSrc}
+            alt="برج سكني حديث"
+            width={780}
+            height={780}
+            sizes="(max-width: 640px) 300px, (max-width: 1024px) 500px, 780px"
+            className="w-full h-auto object-cover object-bottom"
+            priority
+          />
+          {/* Dark gradient overlay toward text side (right in RTL) */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-ink opacity-95" />
+          {/* Soft shadow / gradient overlay at bottom edge blending into ink */}
+          <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-ink via-ink/80 to-transparent" />
+          {/* Soft top gradient blending into sky */}
+          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-ink/90 via-ink/30 to-transparent" />
+        </div>
       </div>
 
       {/* Bottom bar & red scroll circle */}

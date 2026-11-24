@@ -1,15 +1,18 @@
+import { ChatMessage } from "@/lib/types";
+import InlineUnitCard from "@/components/chat/InlineUnitCard";
+
 export interface MessageBubbleProps {
   role: "customer" | "user" | "assistant";
   content: string;
   timestamp?: string;
-  hasUnitCards?: boolean;
+  unit?: ChatMessage["unit"];
 }
 
 export default function MessageBubble({
   role,
   content,
   timestamp,
-  hasUnitCards = false,
+  unit,
 }: MessageBubbleProps) {
   const isCustomer = role === "customer" || role === "user";
 
@@ -29,14 +32,14 @@ export default function MessageBubble({
       >
         <p className="whitespace-pre-line">{content}</p>
 
-        {/* Placeholder slot for UnitCard when message has unit cards */}
-        {hasUnitCards && (
-          <div
-            className="mt-3 border-2 border-dashed border-line/60 rounded-xl p-4 text-center text-xs font-bold text-muted-dark bg-paper/5 select-none"
-            aria-label="خانة بطاقة الوحدة - سيتم إضافتها من العضو 2"
-          >
-            UnitCard — Member 2
-          </div>
+        {/* Unit card slot when message has a recommended unit */}
+        {unit && (
+          <InlineUnitCard
+            priceEgp={unit.price_egp}
+            planSummary={unit.plan_summary}
+            affordability={unit.affordability}
+            title={unit.title}
+          />
         )}
       </div>
 
