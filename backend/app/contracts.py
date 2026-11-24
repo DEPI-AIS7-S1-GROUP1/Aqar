@@ -158,7 +158,7 @@ All optional fields default to ``None``; unknown values must be ``None`` (never 
 """
 
 from datetime import date
-from typing import List, Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -168,34 +168,34 @@ class Listing(BaseModel):
     source_url: str
     collected_at: datetime
     collected_by: str
-    verified_by: Optional[str] = None
+    verified_by: str | None = None
     area: str
     developer: str
     price_egp: float
     area_sqm: float
-    delivery_date: Optional[date] = None
+    delivery_date: date | None = None
     down_payment_pct: float
     years: int
     frequency: Literal["monthly", "quarterly"]
-    delivery_payment_pct: Optional[float] = None
-    maintenance_pct: Optional[float] = None
-    notes: Optional[str] = None
+    delivery_payment_pct: float | None = None
+    maintenance_pct: float | None = None
+    notes: str | None = None
 
 class PaymentPlan(BaseModel):
     down_payment_pct: float
     years: int
     frequency: Literal["monthly", "quarterly"]
-    delivery_payment_pct: Optional[float] = None
-    maintenance_pct: Optional[float] = None
+    delivery_payment_pct: float | None = None
+    maintenance_pct: float | None = None
 
 class SearchQuery(BaseModel):
-    area: Optional[str] = None
-    developer: Optional[str] = None
-    min_price_egp: Optional[float] = None
-    max_price_egp: Optional[float] = None
-    frequency: Optional[Literal["monthly", "quarterly"]] = None
+    area: str | None = None
+    developer: str | None = None
+    min_price_egp: float | None = None
+    max_price_egp: float | None = None
+    frequency: Literal["monthly", "quarterly"] | None = None
 
 class SearchResult(BaseModel):
     total: int
-    results: List[Listing]
+    results: list[Listing]
 
