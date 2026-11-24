@@ -65,4 +65,30 @@
   .animate-scroll-bob {
     animation: scroll-bob 2.4s ease-in-out infinite;
   }
+
+  @keyframes typing-fade {
+    0%, 100% {
+      opacity: 0.3;
+      transform: scale(0.85);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-typing-1 {
+    animation: typing-fade 1.2s infinite ease-in-out;
+    animation-delay: 0s;
+  }
+
+  .animate-typing-2 {
+    animation: typing-fade 1.2s infinite ease-in-out;
+    animation-delay: 0.2s;
+  }
+
+  .animate-typing-3 {
+    animation: typing-fade 1.2s infinite ease-in-out;
+    animation-delay: 0.4s;
+  }
 }
