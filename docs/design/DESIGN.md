@@ -41,7 +41,7 @@ Mode badge (LeadState.mode): AI_ACTIVE = "الـ AI شغال", HANDOFF_PENDING =
 ## 4. Screens and files (frontend/app)
 ### Landing: app/page.tsx  (desktop first, works at 375px)
 - Dark ink background. Giant faint word "عقار" behind everything (colour paper at 5% opacity).
-- Building drawing: /hero-building.svg (file in frontend/public). Bottom-left, absolute, width 780px (max 62%). To use a real photo later, replace the file and keep the same size.
+- Hero image: a REAL building. Preferred: a photo at frontend/public/hero-building.jpg (modern residential tower, dusk or golden hour, some windows lit, a little natural shadow, space on the side for the text). Fallback if the photo is missing: /hero-building.svg (shaded tower drawing). Place it on the visual side, absolute, about 780px wide (max 62%). On top add a dark gradient overlay (ink fading to transparent toward the text) and a soft bottom shadow so it blends into the ink background. NO curved wavy lines.
 - Rotating text ring (SVG textPath, ONE path, never split Arabic into single letters): "مساعد مبيعات عقاري ● بالعامية المصرية ●".
 - Top bar: logo "AqarAI", links (الرئيسية، إزاي بيشتغل، الوحدات، لوحة الوسيط), pill button "ابدأ المحادثة" (paper bg, ink text; hover accent).
 - Headline 64px/900: "يفهم العميل. / يتأكد إنه يقدر يدفع. / يسلّمه للوسيط جاهز." Sub paragraph 18px muted-dark. Buttons: "جرّب المحادثة" (accent) -> /chat, "شوف لوحة الوسيط" (outline) -> /broker.
