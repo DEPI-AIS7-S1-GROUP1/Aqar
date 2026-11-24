@@ -4,3 +4,4 @@ uvicorn
 pytest
 ruff
 langgraph
+openai
