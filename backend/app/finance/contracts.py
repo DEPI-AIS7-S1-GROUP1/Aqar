@@ -33,12 +33,24 @@ class PaymentPlan(BaseModel):
     maintenance: Optional[Decimal] = Field(None, description="Maintenance payment amount")
 
 
+class MortgagePlan(BaseModel):
+    """Input mortgage plan specification."""
+    property_price: Decimal = Field(..., description="Total property price")
+    down_payment: Decimal = Field(..., description="Down payment amount")
+    annual_interest_rate: Decimal = Field(..., description="Annual interest rate as percentage (e.g., 15 for 15%)")
+    years: int = Field(..., description="Loan duration in years", gt=0)
+
+
 class Payment(BaseModel):
     """Individual payment in the schedule."""
     month: int = Field(..., description="Payment month (1-indexed)")
     amount: Decimal = Field(..., description="Payment amount")
     payment_type: PaymentType = Field(..., description="Type of payment")
     description: str = Field(..., description="Payment description")
+    # Mortgage amortization details (optional)
+    interest: Optional[Decimal] = Field(None, description="Interest portion of payment")
+    principal: Optional[Decimal] = Field(None, description="Principal portion of payment")
+    remaining_balance: Optional[Decimal] = Field(None, description="Remaining loan balance after payment")
 
 
 class PlanResult(BaseModel):
@@ -50,3 +62,6 @@ class PlanResult(BaseModel):
     maintenance_payment: Optional[Decimal] = Field(None, description="Maintenance payment amount")
     installment_amount: Optional[Decimal] = Field(None, description="Regular installment amount")
     total_installments: Optional[int] = Field(None, description="Total number of installments")
+    # Mortgage-specific fields
+    loan_amount: Optional[Decimal] = Field(None, description="Financed loan amount")
+    total_interest: Optional[Decimal] = Field(None, description="Total interest paid over loan term")
