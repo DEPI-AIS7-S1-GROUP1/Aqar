@@ -199,3 +199,33 @@ class SearchResult(BaseModel):
     total: int
     results: list[Listing]
 
+
+# ---- error format (Roaa) ----
+# S0-T3-3. Every error answer from the API has this same shape:
+# {"error": {"code": "...", "message": "...", "details": {...}}}
+
+ErrorCode = Literal[
+    "not_found",          # the id does not exist
+    "validation_error",   # the request body or parameters are wrong
+    "data_incomplete",    # a listing is missing fields we need
+    "rate_limited",       # too many requests
+    "internal_error",     # something broke on our side
+]
+
+
+class ErrorBody(BaseModel):
+    code: ErrorCode
+    message: str                      # short, human-readable
+    details: dict | None = None       # extra info; None if there is nothing to add
+                                      # data_incomplete puts {"missing_fields": [...]} here
+
+
+class ErrorResponse(BaseModel):
+    error: ErrorBody
+
+
+# API version header rule (S0-T3-3):
+# Every API answer, success or error, carries the header "API-Version: v1".
+# It is set in ONE middleware in backend/app/main.py (built in S0-T4-1).
+# No route sets it by itself.
+

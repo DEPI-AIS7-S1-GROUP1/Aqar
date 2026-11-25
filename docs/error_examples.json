@@ -1,0 +1,40 @@
+{
+  "not_found": {
+    "error": {
+      "code": "not_found",
+      "message": "Lead not found",
+      "details": { "lead_id": "lead_123" }
+    }
+  },
+  "validation_error": {
+    "error": {
+      "code": "validation_error",
+      "message": "Request body is invalid",
+      "details": { "field": "text", "reason": "must not be empty" }
+    }
+  },
+  "data_incomplete": {
+    "error": {
+      "code": "data_incomplete",
+      "message": "Listing is missing fields needed for the calculation",
+      "details": {
+        "listing_id": "listing_042",
+        "missing_fields": ["price_egp", "years"]
+      }
+    }
+  },
+  "rate_limited": {
+    "error": {
+      "code": "rate_limited",
+      "message": "Too many requests, try again later",
+      "details": { "retry_after_seconds": 30 }
+    }
+  },
+  "internal_error": {
+    "error": {
+      "code": "internal_error",
+      "message": "Something went wrong on our side",
+      "details": null
+    }
+  }
+}
