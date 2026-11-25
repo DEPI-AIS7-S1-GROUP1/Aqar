@@ -1,0 +1,59 @@
+{
+  "total": 3,
+  "results": [
+    {
+      "listing_id": "lst_demo_001",
+      "source_url": "https://example.invalid/demo/listing/1",
+      "collected_at": "2026-11-20T10:00:00+02:00",
+      "collected_by": "member_4",
+      "verified_by": "member_3",
+      "area": "new_cairo",
+      "developer": "Demo Developer Nile",
+      "price_egp": 4800000.0,
+      "area_sqm": 145.0,
+      "delivery_date": "2028-06-30",
+      "down_payment_pct": 10.0,
+      "years": 8,
+      "frequency": "quarterly",
+      "delivery_payment_pct": 10.0,
+      "maintenance_pct": 8.0,
+      "notes": "بيانات تجريبية. التسليم الربع التاني ٢٠٢٨، شقة ٣ غرف."
+    },
+    {
+      "listing_id": "lst_demo_002",
+      "source_url": "https://example.invalid/demo/listing/2",
+      "collected_at": "2026-11-20T11:30:00+02:00",
+      "collected_by": "member_4",
+      "verified_by": null,
+      "area": "new_cairo",
+      "developer": "Demo Developer Delta",
+      "price_egp": 3600000.0,
+      "area_sqm": 120.0,
+      "delivery_date": null,
+      "down_payment_pct": 0.0,
+      "years": 10,
+      "frequency": "monthly",
+      "delivery_payment_pct": null,
+      "maintenance_pct": null,
+      "notes": "بيانات تجريبية. مقدم صفر فعلاً، ودفعة الاستلام مش منشورة."
+    },
+    {
+      "listing_id": "lst_demo_003",
+      "source_url": "https://example.invalid/demo/listing/3",
+      "collected_at": "2026-11-21T09:15:00+02:00",
+      "collected_by": "member_4",
+      "verified_by": "member_3",
+      "area": "sheikh_zayed",
+      "developer": "Demo Developer Nile",
+      "price_egp": 9250000.0,
+      "area_sqm": 210.0,
+      "delivery_date": "2027-12-31",
+      "down_payment_pct": 15.0,
+      "years": 6,
+      "frequency": "quarterly",
+      "delivery_payment_pct": 0.0,
+      "maintenance_pct": 10.0,
+      "notes": "بيانات تجريبية. دوبلكس، مفيش دفعة استلام (صفر حقيقي)."
+    }
+  ]
+}

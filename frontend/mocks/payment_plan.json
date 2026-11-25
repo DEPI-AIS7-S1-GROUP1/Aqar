@@ -1,0 +1,11 @@
+{
+  "plan_id": "plan_demo_001",
+  "down_payment_egp": 480000.0,
+  "down_payment_pct": 10.0,
+  "down_payment_source": "pct",
+  "years": 8,
+  "frequency": "quarterly",
+  "delivery_payment_pct": 10.0,
+  "delivery_month": 36,
+  "maintenance_pct": 8.0
+}
