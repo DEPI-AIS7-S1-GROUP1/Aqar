@@ -53,6 +53,15 @@ def affordability(**overrides) -> AffordabilityResult:
     return AffordabilityResult(**data)
 
 
+# A developer plan whose delivery payment was not published: the remaining amount, and
+# so the installment, cannot be computed. They stay None, never 0.
+UNKNOWN_DELIVERY = {
+    "delivery_payment_egp": None,
+    "installment_egp": None,
+    "monthly_equivalent_egp": None,
+}
+
+
 UNKNOWN_MONTHLY = {
     "status": "unknown",
     "monthly_capacity_egp": None,
@@ -189,13 +198,24 @@ def test_plan_result_optional_fields_default_to_none():
 
 
 def test_unknown_delivery_payment_stays_none_with_warning():
-    r = plan_result(delivery_payment_egp=None, delivery_month=None)
+    r = plan_result(**UNKNOWN_DELIVERY, delivery_month=None)
     assert r.delivery_payment_egp is None
     assert r.warnings == ["delivery_payment_unknown"]
 
 
+def test_unknown_delivery_payment_rejects_a_computed_installment():
+    # A number here means the calculator treated the unknown delivery payment as 0.
+    with pytest.raises(ValidationError, match="must be None while delivery_payment_egp"):
+        plan_result(delivery_payment_egp=None, delivery_month=None)
+
+
+def test_known_delivery_payment_needs_the_installment():
+    with pytest.raises(ValidationError, match="are required when the delivery payment is known"):
+        plan_result(installment_egp=None)
+
+
 def test_unknown_delivery_warning_not_duplicated():
-    r = plan_result(delivery_payment_egp=None, warnings=["delivery_payment_unknown"])
+    r = plan_result(**UNKNOWN_DELIVERY, warnings=["delivery_payment_unknown"])
     assert r.warnings.count("delivery_payment_unknown") == 1
 
 
@@ -269,7 +289,7 @@ def test_payments_default_to_none_meaning_unknown():
 def test_unknown_delivery_payment_means_no_payment_table():
     # Unknown delivery: the table cannot be built, and it must not be built as if it were 0.
     with pytest.raises(ValidationError, match="delivery_payment_egp is unknown"):
-        plan_result(delivery_payment_egp=None, delivery_month=None, payments=example_payments())
+        plan_result(**UNKNOWN_DELIVERY, delivery_month=None, payments=example_payments())
 
 
 def test_unknown_delivery_month_means_no_payment_table():
@@ -442,7 +462,7 @@ def test_plan_result_missing_fields_empty_when_everything_known():
 
 
 def test_unknown_delivery_payment_listed_in_missing_fields():
-    r = plan_result(delivery_payment_egp=None, delivery_month=None)
+    r = plan_result(**UNKNOWN_DELIVERY, delivery_month=None)
     assert r.missing_fields == ["delivery_payment_egp"]
     assert r.delivery_payment_egp is None          # still None, never 0
 
@@ -467,7 +487,7 @@ def test_bank_plan_without_delivery_is_not_missing():
 
 
 def test_missing_fields_keeps_caller_entries_and_is_not_duplicated():
-    r = plan_result(delivery_payment_egp=None,
+    r = plan_result(**UNKNOWN_DELIVERY,
                     missing_fields=["maintenance_pct", "delivery_payment_egp"])
     assert r.missing_fields == ["maintenance_pct", "delivery_payment_egp"]
 

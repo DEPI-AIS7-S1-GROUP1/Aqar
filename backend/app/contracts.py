@@ -282,8 +282,10 @@ class PlanResult(BaseModel):
     delivery_payment_egp: float | None = Field(default=None, ge=0)
     delivery_month: int | None = Field(default=None, ge=0)
     installment_count: int = Field(ge=0)
-    installment_egp: float = Field(ge=0)            # 0 when the down payment is 100%
-    monthly_equivalent_egp: float = Field(ge=0)     # quarterly: installment / 3
+    # None when it cannot be computed: a developer plan whose delivery payment is
+    # unknown has an unknown remaining amount, so its installment is unknown too.
+    installment_egp: float | None = Field(default=None, ge=0)  # 0.0 when the down payment is 100%
+    monthly_equivalent_egp: float | None = Field(default=None, ge=0)  # quarterly: installment / 3
     total_paid_egp: float = Field(ge=0)
     npv_egp: float | None = Field(default=None, ge=0)
     annual_discount_rate_pct: float | None = Field(default=None, ge=0)
@@ -323,6 +325,8 @@ class PlanResult(BaseModel):
         installments = rows("installment")
         if len(installments) != self.installment_count:
             raise ValueError("number of installment rows must equal installment_count")
+        if installments and self.installment_egp is None:
+            raise ValueError("payments must be None while installment_egp is unknown")
         for p in installments:
             if p.month == 0 or not same(p.amount_egp, self.installment_egp):
                 raise ValueError("installment rows must be after month 0 and equal installment_egp")
@@ -351,8 +355,20 @@ class PlanResult(BaseModel):
         if upfront > self.price_egp + _EGP_ABS_TOL:
             raise ValueError("down payment + delivery payment is more than price_egp")
 
+        if self.plan_type == "developer" and delivery is None:
+            # remaining = price - down - delivery is unknown, so the installment is unknown.
+            # Writing a number here would mean the calculator treated the unknown as 0.
+            if self.installment_egp is not None or self.monthly_equivalent_egp is not None:
+                raise ValueError("installment_egp and monthly_equivalent_egp must be None "
+                                 "while delivery_payment_egp is unknown")
+        elif self.installment_egp is None or self.monthly_equivalent_egp is None:
+            raise ValueError("installment_egp and monthly_equivalent_egp are required "
+                             "when the delivery payment is known")
+
         if self.installment_count == 0:
-            if self.installment_egp > _EGP_ABS_TOL or self.monthly_equivalent_egp > _EGP_ABS_TOL:
+            if (self.installment_egp or 0.0) > _EGP_ABS_TOL or (
+                self.monthly_equivalent_egp or 0.0
+            ) > _EGP_ABS_TOL:
                 raise ValueError("installment_count is 0 but an installment amount is set")
             if delivery is not None and self.price_egp - upfront > _EGP_ABS_TOL:
                 raise ValueError("installment_count is 0 but part of the price is left unpaid")
