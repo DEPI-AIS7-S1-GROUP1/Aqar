@@ -36,8 +36,8 @@ The calculator reference sheet uses **Convention A (Effective Monthly Compoundin
   $$delivery = price\_egp \times \frac{delivery\_payment\_pct}{100}$$
   Paid in **Month `delivery_month`**.
   - **Not applicable** (the plan really has no delivery payment): enter `0`. This is a real zero, and the formulas below use it.
-  - **Not published** (the source does not say): leave it blank. In code it is `None`, never `0`. The calculator cannot build the payment table, so `PlanResult.payments` and `npv_egp` stay `None` and a `delivery_payment_unknown` warning is added.
-  - **Delivery month not published** while the delivery payment is more than `0`: same rule. `PlanResult.payments` and `npv_egp` stay `None` and a `delivery_month_unknown` warning is added.
+  - **Not published** (the source does not say): leave it blank. In code it is `None`, never `0`. The calculator cannot build the payment table, so `PlanResult.payments` and `npv_egp` stay `None`, a `delivery_payment_unknown` warning is added, and `delivery_payment_egp` is listed in `PlanResult.missing_fields`.
+  - **Delivery month not published** while the delivery payment is more than `0`: same rule. `PlanResult.payments` and `npv_egp` stay `None`, a `delivery_month_unknown` warning is added, and `delivery_month` is listed in `PlanResult.missing_fields`.
 - **Remaining Amount**:
   $$remaining = price\_egp - down - delivery$$
 - **Installment Count**:

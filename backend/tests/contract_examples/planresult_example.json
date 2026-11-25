@@ -49,5 +49,6 @@
     {"month": 93, "amount_egp": 60000.0, "type": "installment"},
     {"month": 96, "amount_egp": 60000.0, "type": "installment"}
   ],
+  "missing_fields": [],
   "warnings": []
 }

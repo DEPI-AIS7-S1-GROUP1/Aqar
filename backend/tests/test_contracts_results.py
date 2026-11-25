@@ -57,7 +57,7 @@ UNKNOWN_MONTHLY = {
     "status": "unknown",
     "monthly_capacity_egp": None,
     "monthly_gap_egp": None,
-    "missing_inputs": ["monthly_capacity_egp"],
+    "missing_fields": ["monthly_capacity_egp"],
 }
 
 
@@ -364,16 +364,16 @@ def test_delivery_row_rejected_when_plan_has_no_delivery():
 
 # ---------- AffordabilityResult ----------
 
-def test_affordability_unknown_with_missing_inputs():
+def test_affordability_unknown_with_missing_fields():
     r = affordability(**UNKNOWN_MONTHLY)
     assert r.status == "unknown"
     assert r.monthly_capacity_egp is None
     assert r.monthly_gap_egp is None
 
 
-def test_affordability_unknown_needs_missing_inputs():
+def test_affordability_unknown_needs_missing_fields():
     with pytest.raises(ValidationError):
-        affordability(**{**UNKNOWN_MONTHLY, "missing_inputs": []})
+        affordability(**{**UNKNOWN_MONTHLY, "missing_fields": []})
 
 
 @pytest.mark.parametrize("status", ["fit", "tight", "not_fit"])
@@ -382,9 +382,9 @@ def test_known_status_needs_both_gaps(status):
         affordability(status=status, monthly_capacity_egp=None, monthly_gap_egp=None)
 
 
-def test_known_status_cannot_have_missing_inputs():
+def test_known_status_cannot_have_missing_fields():
     with pytest.raises(ValidationError):
-        affordability(status="fit", missing_inputs=["timeline"])
+        affordability(status="fit", missing_fields=["timeline"])
 
 
 def test_gap_must_match_required_minus_available():
@@ -395,7 +395,7 @@ def test_gap_must_match_required_minus_available():
 def test_gap_without_inputs_rejected():
     with pytest.raises(ValidationError):
         affordability(status="unknown", monthly_capacity_egp=None,
-                      missing_inputs=["monthly_capacity_egp"])
+                      missing_fields=["monthly_capacity_egp"])
 
 
 def test_zero_down_available_is_real_zero():
@@ -433,3 +433,88 @@ def test_to_entry_fits_on_lead_state():
 def test_affordability_entry_unchanged():
     entry = AffordabilityEntry(listing_id="l1", plan_id="p1", status="fit")
     assert entry.flags == []
+
+
+# ---------- S0-T3-4 sheet alignment: missing_fields and reason ----------
+
+def test_plan_result_missing_fields_empty_when_everything_known():
+    assert plan_result().missing_fields == []
+
+
+def test_unknown_delivery_payment_listed_in_missing_fields():
+    r = plan_result(delivery_payment_egp=None, delivery_month=None)
+    assert r.missing_fields == ["delivery_payment_egp"]
+    assert r.delivery_payment_egp is None          # still None, never 0
+
+
+def test_unknown_delivery_month_listed_in_missing_fields():
+    r = plan_result(delivery_month=None)
+    assert r.missing_fields == ["delivery_month"]
+
+
+def test_zero_delivery_payment_is_not_missing():
+    r = plan_result(delivery_payment_egp=0.0, delivery_month=None)
+    assert r.missing_fields == []
+
+
+def test_bank_plan_without_delivery_is_not_missing():
+    r = PlanResult(
+        listing_id="l1", plan_id="p1", plan_type="bank", price_egp=1_000_000,
+        down_payment_egp=200_000, down_payment_pct=20, installment_count=60,
+        installment_egp=20_000, monthly_equivalent_egp=20_000, total_paid_egp=1_400_000,
+    )
+    assert r.missing_fields == []
+
+
+def test_missing_fields_keeps_caller_entries_and_is_not_duplicated():
+    r = plan_result(delivery_payment_egp=None,
+                    missing_fields=["maintenance_pct", "delivery_payment_egp"])
+    assert r.missing_fields == ["maintenance_pct", "delivery_payment_egp"]
+
+
+def test_affordability_reason_is_required():
+    data = load("affordabilityresult_example.json")
+    data.pop("reason")
+    with pytest.raises(ValidationError):
+        AffordabilityResult(**data)
+
+
+@pytest.mark.parametrize("reason", ["", "   "])
+def test_affordability_reason_cannot_be_blank(reason):
+    with pytest.raises(ValidationError):
+        affordability(reason=reason)
+
+
+@pytest.mark.parametrize(
+    "reason",
+    [
+        "Monthly installment is 2000 EGP above capacity.",
+        "القسط أعلى من قدرتك بـ ٢٠٠٠ جنيه",        # Arabic-Indic digits
+        "Down payment short by 5%",
+    ],
+)
+def test_affordability_reason_cannot_carry_numbers(reason):
+    with pytest.raises(ValidationError, match="must not contain numbers"):
+        affordability(reason=reason)
+
+
+def test_affordability_reason_accepts_arabic_text():
+    reason = "المقدم متغطي، بس القسط الشهري أعلى من القدرة."
+    assert affordability(reason=reason).reason == reason
+
+
+def test_affordability_has_exactly_four_states():
+    import typing
+
+    from app.contracts import AffordabilityStatus
+    assert set(typing.get_args(AffordabilityStatus)) == {"fit", "tight", "not_fit", "unknown"}
+    with pytest.raises(ValidationError):
+        affordability(status="comfortable")
+
+
+def test_old_missing_inputs_name_is_not_a_field():
+    # The old field name must not be accepted as a stand-in for missing_fields.
+    r = affordability(**{**UNKNOWN_MONTHLY, "missing_fields": ["monthly_capacity_egp"],
+                         "missing_inputs": ["x"]})
+    assert r.missing_fields == ["monthly_capacity_egp"]
+    assert not hasattr(r, "missing_inputs")

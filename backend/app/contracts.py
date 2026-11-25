@@ -237,6 +237,10 @@ class SearchResult(BaseModel):
 # S0-T3-4. Every number in these models is produced by code (calculator / affordability
 # tools), never by the LLM. Unknown = None, never 0. Use `is None` checks, not `if not x`.
 
+# The four states from the S0-T3-4 task sheet. The sheet describes them in words
+# ("comfortable, tight, not suitable, unknown"); the codes below are the ones the
+# design (docs/design/DESIGN.md), the frontend and AffordabilityEntry already use:
+#   comfortable -> "fit", tight -> "tight", not suitable -> "not_fit", unknown -> "unknown"
 AffordabilityStatus = Literal["fit", "tight", "not_fit", "unknown"]
 
 # Float noise allowance in EGP when checking sums computed by code. Not a data tolerance.
@@ -263,6 +267,11 @@ class PlanResult(BaseModel):
     month is unknown. An unknown amount is never written into the table as 0.
     Maintenance rows are allowed but are not part of ``total_paid_egp``
     (see docs/calculator-reference/README.md).
+
+    ``missing_fields`` names the plan inputs the source did not publish (S0-T3-4 sheet,
+    step 2). The model adds ``"delivery_payment_egp"`` and ``"delivery_month"`` itself
+    when they are unknown; the calculator may add others. ``warnings`` stays for the
+    existing warning codes.
     """
     listing_id: str
     plan_id: str
@@ -279,6 +288,7 @@ class PlanResult(BaseModel):
     npv_egp: float | None = Field(default=None, ge=0)
     annual_discount_rate_pct: float | None = Field(default=None, ge=0)
     payments: list[Payment] | None = None
+    missing_fields: list[str] = []
     warnings: list[str] = []
 
     @model_validator(mode="after")
@@ -350,19 +360,16 @@ class PlanResult(BaseModel):
         if (self.npv_egp is None) != (self.annual_discount_rate_pct is None):
             raise ValueError("npv_egp and annual_discount_rate_pct must be set together")
 
-        if (
-            self.plan_type == "developer"
-            and delivery is None
-            and "delivery_payment_unknown" not in self.warnings
-        ):
-            self.warnings.append("delivery_payment_unknown")
-        if (
-            delivery is not None
-            and delivery > 0
-            and self.delivery_month is None
-            and "delivery_month_unknown" not in self.warnings
-        ):
-            self.warnings.append("delivery_month_unknown")
+        def note(field: str, warning: str) -> None:
+            if field not in self.missing_fields:
+                self.missing_fields.append(field)
+            if warning not in self.warnings:
+                self.warnings.append(warning)
+
+        if self.plan_type == "developer" and delivery is None:
+            note("delivery_payment_egp", "delivery_payment_unknown")
+        if delivery is not None and delivery > 0 and self.delivery_month is None:
+            note("delivery_month", "delivery_month_unknown")
         return self
 
 
@@ -371,10 +378,19 @@ class AffordabilityResult(BaseModel):
 
     Gaps are ``required - available``: positive = shortfall, zero or negative = covered.
     The fit / tight thresholds live in the affordability code, not here.
+
+    ``reason`` is the short reason text the sheet asks for. The affordability code writes
+    it from a fixed template; the LLM never writes it. It must not contain digits
+    (Latin or Arabic-Indic): every number travels in the numeric fields above, where
+    the Guard can check it, never inside free text.
+
+    ``missing_fields`` names the customer inputs that are unknown. ``status="unknown"``
+    needs at least one, so the agent knows which question to ask next.
     """
     listing_id: str
     plan_id: str
     status: AffordabilityStatus
+    reason: str = Field(min_length=1)
     down_payment_required_egp: float | None = Field(default=None, ge=0)
     down_payment_available_egp: float | None = Field(default=None, ge=0)
     down_payment_gap_egp: float | None = None
@@ -382,7 +398,7 @@ class AffordabilityResult(BaseModel):
     monthly_capacity_egp: float | None = Field(default=None, ge=0)
     monthly_gap_egp: float | None = None
     flags: list[str] = []                          # e.g. ["delivery_payment"]
-    missing_inputs: list[str] = []                 # e.g. ["monthly_capacity_egp"]
+    missing_fields: list[str] = []                 # e.g. ["monthly_capacity_egp"]
 
     @model_validator(mode="after")
     def _check_status(self) -> "AffordabilityResult":
@@ -400,12 +416,17 @@ class AffordabilityResult(BaseModel):
             if not math.isclose(gap, required - available, abs_tol=_EGP_ABS_TOL):
                 raise ValueError(f"{name} gap must equal required - available")
 
+        if not self.reason.strip():
+            raise ValueError("reason must not be blank")
+        if any(ch.isdigit() for ch in self.reason):
+            raise ValueError("reason must not contain numbers: put them in the numeric fields")
+
         if self.status == "unknown":
-            if not self.missing_inputs:
-                raise ValueError("status='unknown' needs at least one missing_inputs entry")
+            if not self.missing_fields:
+                raise ValueError("status='unknown' needs at least one missing_fields entry")
         else:
-            if self.missing_inputs:
-                raise ValueError(f"status='{self.status}' cannot have missing_inputs")
+            if self.missing_fields:
+                raise ValueError(f"status='{self.status}' cannot have missing_fields")
             if self.down_payment_gap_egp is None or self.monthly_gap_egp is None:
                 raise ValueError(f"status='{self.status}' needs both gaps to be known")
         return self
