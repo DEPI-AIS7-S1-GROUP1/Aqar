@@ -243,7 +243,7 @@ def test_bank_plan_npv_at_loan_rate_equals_price():
 # ---- unknown stays None, never 0 ----
 
 def test_unknown_delivery_payment_gives_none_not_zero():
-    plan = dev_plan(delivery_payment_egp=None)
+    plan = dev_plan(delivery_payment_egp=None, installment_egp=None, monthly_equivalent_egp=None)
     assert "delivery_payment_unknown" in plan.warnings  # added by the contract
     assert plan_cashflows(plan) is None
     result = plan_npv(plan, 20.0)
@@ -275,7 +275,7 @@ def test_plan_npv_does_not_change_input_and_keeps_warnings():
     result = plan_npv(plan, 20.0)
     assert plan.npv_egp is None and plan.annual_discount_rate_pct is None
     assert result.annual_discount_rate_pct == 20.0
-    again = plan_npv(dev_plan(delivery_payment_egp=None), 20.0)
+    again = plan_npv(dev_plan(delivery_payment_egp=None, installment_egp=None, monthly_equivalent_egp=None), 20.0)
     assert again.warnings.count(WARNING_NPV_DELIVERY_UNKNOWN) == 1
 
 
