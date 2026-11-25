@@ -38,7 +38,11 @@ services:
 
   api:
     build: ../backend
-    env_file: ../.env
+    env_file:
+      # Optional so a fresh clone starts without a .env (the sheet's second-computer test).
+      # Needs Docker Compose 2.24 or newer.
+      - path: ../.env
+        required: false
     environment:
       # Overrides any value from .env: inside compose the hosts are the service names.
       DATABASE_URL: postgresql://aqarai:aqarai@db:5432/aqarai
