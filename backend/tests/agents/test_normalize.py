@@ -33,6 +33,8 @@ from app.agent.normalize import (
         ("٣ غرف", "3 غرف"),                 # Arabic-Indic digit
         ("۲۵۰۰۰۰۰", "2500000"),             # Eastern Arabic-Indic (Persian) digits
         ("١٢٣٤٥٦٧٨٩٠", "1234567890"),
+        ("٢٫٥ مليون", "2.5 مليون"),         # Arabic decimal separator
+        ("٢٬٥٠٠٬٠٠٠", "2,500,000"),         # Arabic thousands separator
         ("  شقة   في\tالتجمع \n", "شقه في التجمع"),   # spaces trimmed and collapsed
         ("\u200fالتجمع\u200e", "التجمع"),   # invisible RTL/LTR marks removed
         ("New Cairo", "New Cairo"),         # Latin text is left as it is
@@ -162,3 +164,8 @@ def test_empty_synonym_is_rejected(tmp_path):
 def test_shipped_data_file_loads():
     table = load_synonyms()
     assert len(set(table.values())) == len(SAME_AREA)
+
+
+@pytest.mark.parametrize("text", ["التجمع؟", "التجمع!", "new cairo?", "زايد؛", "Zayed!"])
+def test_trailing_question_or_exclamation_mark_still_matches(text):
+    assert normalize_area(text) is not None
