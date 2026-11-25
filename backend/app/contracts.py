@@ -242,12 +242,27 @@ AffordabilityStatus = Literal["fit", "tight", "not_fit", "unknown"]
 # Float noise allowance in EGP when checking sums computed by code. Not a data tolerance.
 _EGP_ABS_TOL = 0.01
 
+PaymentType = Literal["down_payment", "installment", "delivery", "maintenance"]
+
+
+class Payment(BaseModel):
+    """One row of a plan's payment table: what is paid, in which month after the contract."""
+    month: int = Field(ge=0)                        # 0 = contract month
+    amount_egp: float = Field(ge=0, allow_inf_nan=False)
+    type: PaymentType
+
 
 class PlanResult(BaseModel):
     """Calculator output for ONE plan of ONE listing (S1-T3-1 / S1-T3-2). npv() (S1-T3-3) reads it.
 
     ``delivery_payment_egp=None`` means the source did not publish it (unknown), and a
     ``"delivery_payment_unknown"`` warning is added. ``0.0`` means the plan really has none.
+
+    ``payments`` is the full payment table, sorted by month. ``None`` means the table is
+    unknown: it was not built, or it cannot be built because the delivery payment or its
+    month is unknown. An unknown amount is never written into the table as 0.
+    Maintenance rows are allowed but are not part of ``total_paid_egp``
+    (see docs/calculator-reference/README.md).
     """
     listing_id: str
     plan_id: str
@@ -263,7 +278,61 @@ class PlanResult(BaseModel):
     total_paid_egp: float = Field(ge=0)
     npv_egp: float | None = Field(default=None, ge=0)
     annual_discount_rate_pct: float | None = Field(default=None, ge=0)
+    payments: list[Payment] | None = None
     warnings: list[str] = []
+
+    @model_validator(mode="after")
+    def _check_payments(self) -> "PlanResult":
+        if self.payments is None:
+            return self
+        if not self.payments:
+            raise ValueError("payments is empty: use None when the payment table is unknown")
+
+        delivery = self.delivery_payment_egp
+        if self.plan_type == "developer" and delivery is None:
+            raise ValueError("payments must be None while delivery_payment_egp is unknown")
+        if delivery is not None and delivery > 0 and self.delivery_month is None:
+            raise ValueError("payments must be None while delivery_month is unknown")
+
+        months = [p.month for p in self.payments]
+        if months != sorted(months):
+            raise ValueError("payments must be sorted by month")
+
+        def rows(kind: str) -> list[Payment]:
+            return [p for p in self.payments if p.type == kind]
+
+        def same(a: float, b: float) -> bool:
+            return math.isclose(a, b, abs_tol=_EGP_ABS_TOL)
+
+        down = rows("down_payment")
+        if len(down) != 1 or down[0].month != 0 or not same(down[0].amount_egp,
+                                                            self.down_payment_egp):
+            raise ValueError("payments need exactly one down_payment row in month 0 "
+                             "equal to down_payment_egp")
+
+        installments = rows("installment")
+        if len(installments) != self.installment_count:
+            raise ValueError("number of installment rows must equal installment_count")
+        for p in installments:
+            if p.month == 0 or not same(p.amount_egp, self.installment_egp):
+                raise ValueError("installment rows must be after month 0 and equal installment_egp")
+
+        deliveries = rows("delivery")
+        if delivery is None or delivery == 0:
+            if deliveries:
+                raise ValueError("delivery row present but the plan has no delivery payment")
+        elif (
+            len(deliveries) != 1
+            or deliveries[0].month != self.delivery_month
+            or not same(deliveries[0].amount_egp, delivery)
+        ):
+            raise ValueError("payments need exactly one delivery row equal to "
+                             "delivery_payment_egp in delivery_month")
+
+        paid = sum(p.amount_egp for p in self.payments if p.type != "maintenance")
+        if not same(paid, self.total_paid_egp):
+            raise ValueError("payments (without maintenance) must add up to total_paid_egp")
+        return self
 
     @model_validator(mode="after")
     def _check_amounts(self) -> "PlanResult":

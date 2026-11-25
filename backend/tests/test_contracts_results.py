@@ -20,6 +20,7 @@ from app.contracts import (
     AffordabilityResult,
     LeadState,
     Listing,
+    Payment,
     PaymentPlan,
     PlanResult,
 )
@@ -32,9 +33,18 @@ def load(name: str) -> dict:
 
 
 def plan_result(**overrides) -> PlanResult:
+    """The example without its payment table, so one-field overrides stay valid.
+
+    Pass ``payments=...`` to test the table itself.
+    """
     data = load("planresult_example.json")
+    data.pop("payments")
     data.update(overrides)
     return PlanResult(**data)
+
+
+def example_payments() -> list[dict]:
+    return load("planresult_example.json")["payments"]
 
 
 def affordability(**overrides) -> AffordabilityResult:
@@ -239,6 +249,117 @@ def test_full_down_payment_plan():
 def test_plan_result_rejects_bad_values(fields):
     with pytest.raises(ValidationError):
         plan_result(**fields)
+
+
+# ---------- PlanResult.payments (the payment table) ----------
+
+def test_example_payment_table_matches_totals():
+    r = PlanResult(**load("planresult_example.json"))
+    assert r.payments is not None
+    assert [p.type for p in r.payments].count("installment") == r.installment_count
+    assert sum(p.amount_egp for p in r.payments) == r.total_paid_egp
+    assert r.payments[0] == Payment(month=0, amount_egp=240_000, type="down_payment")
+
+
+def test_payments_default_to_none_meaning_unknown():
+    r = plan_result()
+    assert r.payments is None
+
+
+def test_unknown_delivery_payment_means_no_payment_table():
+    # Unknown delivery: the table cannot be built, and it must not be built as if it were 0.
+    with pytest.raises(ValidationError, match="delivery_payment_egp is unknown"):
+        plan_result(delivery_payment_egp=None, delivery_month=None, payments=example_payments())
+
+
+def test_unknown_delivery_month_means_no_payment_table():
+    with pytest.raises(ValidationError, match="delivery_month is unknown"):
+        plan_result(delivery_month=None, payments=example_payments())
+
+
+def test_bank_plan_without_delivery_can_have_a_table():
+    pays = [{"month": 0, "amount_egp": 200_000, "type": "down_payment"}]
+    pays += [{"month": m, "amount_egp": 20_000, "type": "installment"} for m in range(1, 61)]
+    r = PlanResult(
+        listing_id="l1", plan_id="p1", plan_type="bank", price_egp=1_000_000,
+        down_payment_egp=200_000, down_payment_pct=20, installment_count=60,
+        installment_egp=20_000, monthly_equivalent_egp=20_000, total_paid_egp=1_400_000,
+        payments=pays,
+    )
+    assert len(r.payments) == 61
+
+
+def test_zero_down_payment_row_is_a_real_zero():
+    pays = [{"month": 0, "amount_egp": 0.0, "type": "down_payment"}]
+    pays += [{"month": m, "amount_egp": 20_000, "type": "installment"} for m in range(1, 121)]
+    r = plan_result(
+        down_payment_egp=0.0, down_payment_pct=0.0, delivery_payment_egp=0.0,
+        installment_count=120, installment_egp=20_000, monthly_equivalent_egp=20_000,
+        payments=pays,
+    )
+    assert r.payments[0].amount_egp == 0.0
+
+
+def test_full_down_payment_table_has_one_row():
+    r = plan_result(
+        down_payment_egp=2_400_000, down_payment_pct=100, delivery_payment_egp=0.0,
+        delivery_month=None, installment_count=0, installment_egp=0.0,
+        monthly_equivalent_egp=0.0,
+        payments=[{"month": 0, "amount_egp": 2_400_000, "type": "down_payment"}],
+    )
+    assert len(r.payments) == 1
+
+
+def test_maintenance_row_is_not_part_of_total_paid():
+    pays = example_payments()
+    pays.append({"month": 36, "amount_egp": 192_000, "type": "maintenance"})
+    pays.sort(key=lambda p: p["month"])
+    r = plan_result(payments=pays)
+    assert r.total_paid_egp == 2_400_000
+
+
+def _broken(change) -> list[dict]:
+    pays = example_payments()
+    change(pays)
+    return pays
+
+
+@pytest.mark.parametrize(
+    "pays",
+    [
+        [],                                                              # empty is not unknown
+        _broken(lambda p: p.pop(0)),                                     # no down payment row
+        _broken(lambda p: p.insert(0, dict(p[0]))),                      # two down payment rows
+        _broken(lambda p: p[0].update(month=1)),                         # down payment not month 0
+        _broken(lambda p: p[0].update(amount_egp=1.0)),                  # wrong down amount
+        _broken(lambda p: p.pop(1)),                                     # one installment missing
+        _broken(lambda p: p[1].update(amount_egp=59_000)),               # wrong installment
+        _broken(lambda p: p.pop(next(i for i, x in enumerate(p)
+                                     if x["type"] == "delivery"))),     # no delivery row
+        _broken(lambda p: next(x for x in p
+                               if x["type"] == "delivery").update(month=48)),  # wrong month
+        _broken(lambda p: p.reverse()),                                  # not sorted
+        _broken(lambda p: p[0].update(amount_egp=-1)),                   # negative amount
+        _broken(lambda p: p[0].update(amount_egp=float("nan"))),         # NaN amount
+        _broken(lambda p: p[0].update(type="bonus")),                    # unknown type
+    ],
+)
+def test_bad_payment_table_rejected(pays):
+    with pytest.raises(ValidationError):
+        plan_result(payments=pays)
+
+
+def test_delivery_row_rejected_when_plan_has_no_delivery():
+    pays = [{"month": 0, "amount_egp": 0.0, "type": "down_payment"},
+            {"month": 1, "amount_egp": 1_000_000, "type": "installment"},
+            {"month": 2, "amount_egp": 0.0, "type": "delivery"}]
+    with pytest.raises(ValidationError, match="no delivery payment"):
+        PlanResult(
+            listing_id="l1", plan_id="p1", plan_type="developer", price_egp=1_000_000,
+            down_payment_egp=0, down_payment_pct=0, delivery_payment_egp=0.0,
+            installment_count=1, installment_egp=1_000_000,
+            monthly_equivalent_egp=1_000_000, total_paid_egp=1_000_000, payments=pays,
+        )
 
 
 # ---------- AffordabilityResult ----------
