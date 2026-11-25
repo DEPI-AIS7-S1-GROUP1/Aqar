@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "source": "S0-T6-1 data sheet, 'lists' tab (AqarAI_listings.xlsx), read 2026-11-25",
+  "note": "Synonyms are matched after normalize_text() and lowercasing, so spelling variants of alef, ya, ta marbuta, diacritics, digits and case do not need their own entries. Add new areas here; normalize.py does not change.",
+  "areas": [
+    {
+      "id": "new_cairo",
+      "name_ar": "القاهرة الجديدة",
+      "name_en": "New Cairo",
+      "synonyms": [
+        "القاهرة الجديدة",
+        "مدينة القاهرة الجديدة",
+        "التجمع",
+        "تجمع",
+        "التجمع الخامس",
+        "تجمع خامس",
+        "التجمع 5",
+        "الخامس",
+        "new cairo",
+        "fifth settlement",
+        "5th settlement",
+        "the fifth settlement",
+        "tagamoa",
+        "tagamo3",
+        "el tagamoa",
+        "tagamoa el khames",
+        "el tagamoa el khames",
+        "tagamo3 el khames"
+      ]
+    },
+    {
+      "id": "sheikh_zayed",
+      "name_ar": "الشيخ زايد",
+      "name_en": "Sheikh Zayed",
+      "synonyms": [
+        "الشيخ زايد",
+        "مدينة الشيخ زايد",
+        "زايد",
+        "sheikh zayed",
+        "el sheikh zayed",
+        "sheikh zayed city",
+        "shiekh zayed",
+        "shaikh zayed",
+        "el shaikh zayed",
+        "zayed"
+      ]
+    },
+    {
+      "id": "october_6",
+      "name_ar": "6 أكتوبر",
+      "name_en": "6th of October",
+      "synonyms": [
+        "6 أكتوبر",
+        "مدينة 6 أكتوبر",
+        "السادس من أكتوبر",
+        "ستة أكتوبر",
+        "أكتوبر",
+        "6 october",
+        "6th october",
+        "6th of october",
+        "sixth of october",
+        "october",
+        "6 october city"
+      ]
+    },
+    {
+      "id": "new_capital",
+      "name_ar": "العاصمة الإدارية",
+      "name_en": "New Administrative Capital",
+      "synonyms": [
+        "العاصمة الإدارية",
+        "العاصمة الإدارية الجديدة",
+        "العاصمة الجديدة",
+        "العاصمة",
+        "new capital",
+        "the new capital",
+        "new administrative capital",
+        "administrative capital",
+        "nac"
+      ]
+    },
+    {
+      "id": "mostakbal_city",
+      "name_ar": "مستقبل سيتي",
+      "name_en": "Mostakbal City",
+      "synonyms": [
+        "مستقبل سيتي",
+        "المستقبل سيتي",
+        "مدينة المستقبل",
+        "mostakbal city",
+        "mostakbal",
+        "future city"
+      ]
+    },
+    {
+      "id": "north_coast_ras_el_hekma",
+      "name_ar": "الساحل الشمالي – رأس الحكمة",
+      "name_en": "North Coast – Ras El Hekma",
+      "synonyms": [
+        "الساحل الشمالي – رأس الحكمة",
+        "الساحل الشمالي رأس الحكمة",
+        "رأس الحكمة",
+        "الساحل الشمالي",
+        "الساحل",
+        "ras el hekma",
+        "ras elhekma",
+        "ras al hekma",
+        "ras al hikma",
+        "north coast",
+        "sahel",
+        "el sahel"
+      ]
+    }
+  ]
+}
