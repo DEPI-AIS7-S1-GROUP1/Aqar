@@ -24,6 +24,7 @@ from app.contracts import PlanResult
 from app.finance.calculator import (
     WARNING_NPV_DELIVERY_MONTH_UNKNOWN,
     WARNING_NPV_DELIVERY_UNKNOWN,
+    WARNING_NPV_PAYMENTS_UNKNOWN,
     monthly_rate,
     npv,
     plan_cashflows,
@@ -39,7 +40,23 @@ def example_plan() -> PlanResult:
     return PlanResult.model_validate(data)
 
 
-def dev_plan(**overrides) -> PlanResult:
+def table(down: float, installment: float, count: int, step: int,
+          delivery: float | None = None, delivery_month: int | None = None) -> list[dict]:
+    """A payment table written by hand for the tests (npv() must not build it)."""
+    rows = [{"month": 0, "amount_egp": down, "type": "down_payment"}]
+    rows += [{"month": k * step, "amount_egp": installment, "type": "installment"}
+             for k in range(1, count + 1)]
+    if delivery:
+        rows.append({"month": delivery_month, "amount_egp": delivery, "type": "delivery"})
+    return sorted(rows, key=lambda r: r["month"])   # stable: delivery stays after its installment
+
+
+def dev_plan(step: int = 3, **overrides) -> PlanResult:
+    """Developer plan with its payment table. ``step`` = months between installments.
+
+    The table is left out (``payments=None``) when it cannot be known: the delivery payment,
+    or its month, is not published.
+    """
     base = {
         "listing_id": "lst_t",
         "plan_id": "plan_t",
@@ -55,6 +72,11 @@ def dev_plan(**overrides) -> PlanResult:
         "total_paid_egp": 1_000_000.0,
     }
     base.update(overrides)
+    delivery, month = base["delivery_payment_egp"], base["delivery_month"]
+    known = delivery is not None and (delivery == 0 or month is not None)
+    if "payments" not in base and known:
+        base["payments"] = table(base["down_payment_egp"], base["installment_egp"],
+                                 base["installment_count"], step, delivery, month)
     return PlanResult(**base)
 
 
@@ -76,6 +98,7 @@ def bank_plan(price: float, down_pct: float, annual_rate_pct: float, years: int)
         installment_egp=pmt,
         monthly_equivalent_egp=pmt,
         total_paid_egp=down + pmt * n,
+        payments=table(down, pmt, n, 1),
     )
 
 
@@ -185,6 +208,7 @@ def test_example_plan_cashflows():
 def test_zero_down_plan():
     # 0 % down is a real 0: month 0 holds 0.0, 12 monthly x 10,000
     plan = dev_plan(
+        step=1,
         price_egp=120_000.0, down_payment_egp=0.0, down_payment_pct=0.0,
         installment_count=12, installment_egp=10_000.0, monthly_equivalent_egp=10_000.0,
         total_paid_egp=120_000.0,
@@ -286,10 +310,54 @@ def test_bad_cashflow_raises(flow):
 
 
 def test_total_paid_mismatch_raises():
+    # PlanResult rejects this when validated; model_copy skips validation, so npv() checks too.
+    broken = dev_plan().model_copy(update={"total_paid_egp": 999_000.0})
     with pytest.raises(ValueError, match="total_paid_egp"):
-        plan_cashflows(dev_plan(total_paid_egp=999_000.0))
+        plan_cashflows(broken)
 
 
-def test_unreadable_frequency_raises():
-    with pytest.raises(ValueError, match="monthly from quarterly"):
-        plan_cashflows(dev_plan(monthly_equivalent_egp=100_000.0))
+# ---- cash flows come from PlanResult.payments, not from inferred frequency ----
+
+def test_months_are_read_from_the_table_not_inferred():
+    # Installments in months 12 and 24 are neither monthly nor quarterly; the old code
+    # could not read them. 25 %: 100,000 + 100,000 / 1.25 + 100,000 / 1.25^2 = 244,000
+    plan = dev_plan(
+        step=12, price_egp=300_000.0, down_payment_egp=100_000.0, down_payment_pct=100 / 3,
+        installment_count=2, installment_egp=100_000.0, monthly_equivalent_egp=100_000.0 / 12,
+        total_paid_egp=300_000.0,
+    )
+    assert plan_cashflows(plan) == [(0, 100_000.0), (12, 100_000.0), (24, 100_000.0)]
+    assert plan_npv(plan, 25.0).npv_egp == pytest.approx(244_000.0, abs=1e-6)
+
+
+def test_monthly_equivalent_does_not_change_the_npv():
+    # Same table, different monthly_equivalent_egp: npv() ignores it now.
+    a = dev_plan()
+    b = dev_plan(monthly_equivalent_egp=200_000.0)
+    assert plan_npv(a, 20.0).npv_egp == plan_npv(b, 20.0).npv_egp
+
+
+def test_maintenance_rows_are_left_out():
+    data = example_plan().model_dump()
+    data["payments"].append({"month": 96, "amount_egp": 50_000.0, "type": "maintenance"})
+    plan = PlanResult.model_validate(data)
+    flows = plan_cashflows(plan)
+    assert len(flows) == len(data["payments"]) - 1
+    assert npv(flows, 0.0) == plan.total_paid_egp
+
+
+def test_plan_without_payment_table_gives_none_not_rebuilt():
+    # Behaviour change: before, npv() rebuilt the schedule from installment fields.
+    # Now a PlanResult with payments=None has an unknown NPV.
+    plan = bank_plan(1_000_000.0, 10.0, 20.0, 5).model_copy(update={"payments": None})
+    assert plan_cashflows(plan) is None
+    result = plan_npv(plan, 20.0)
+    assert result.npv_egp is None
+    assert result.annual_discount_rate_pct is None
+    assert WARNING_NPV_PAYMENTS_UNKNOWN in result.warnings
+
+
+def test_zero_down_row_is_kept_in_month_zero():
+    plan = dev_plan(down_payment_egp=0.0, down_payment_pct=0.0, installment_egp=250_000.0,
+                    monthly_equivalent_egp=250_000.0 / 3)
+    assert plan_cashflows(plan)[0] == (0, 0.0)

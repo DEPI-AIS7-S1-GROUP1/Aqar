@@ -15,9 +15,12 @@ The discount rate is always passed in by the caller. There is no default here on
 purpose: which rate AqarAI uses (CBE rate, inflation, a fixed product choice) is an
 open team decision and must not be hidden inside the calculator.
 
-Unknown stays unknown: if a developer plan's delivery payment was not published
-(``delivery_payment_egp is None``), we cannot build the real cash flows, so the NPV
-is ``None`` with a warning. It is never computed as if the delivery payment were 0.
+Cash flows come from ``PlanResult.payments`` (the payment table the calculator built).
+npv() never rebuilds the schedule itself and never guesses the installment frequency.
+
+Unknown stays unknown: if the payment table is ``None`` (for example a developer plan
+whose delivery payment was not published), the NPV is ``None`` with a warning. It is
+never computed as if a missing payment were 0.
 """
 
 from __future__ import annotations
@@ -35,6 +38,7 @@ _ABS_TOL_EGP = 0.01
 
 WARNING_NPV_DELIVERY_UNKNOWN = "npv_unknown_delivery_payment"
 WARNING_NPV_DELIVERY_MONTH_UNKNOWN = "npv_unknown_delivery_month"
+WARNING_NPV_PAYMENTS_UNKNOWN = "npv_unknown_payment_table"
 
 
 def monthly_rate(annual_discount_rate_pct: float) -> float:
@@ -73,35 +77,23 @@ def npv(cashflows: Sequence[Cashflow], annual_discount_rate_pct: float) -> float
 
 
 def plan_cashflows(plan: PlanResult) -> list[Cashflow] | None:
-    """Build the ``(month, amount)`` list of a calculator ``PlanResult``.
+    """Read the ``(month, amount)`` cash flows from ``plan.payments``.
 
-    * Month 0: the down payment (also when it is a real 0).
-    * Installments: months 1..n (monthly) or 3, 6, ..., 3n (quarterly).
-    * Delivery payment: added in ``delivery_month`` (it may share a month with an installment).
+    Every row is used as it is (down payment, installments, delivery), in table order.
+    Maintenance rows are left out: they are not part of the price (README, Convention A).
 
-    Returns ``None`` when the cash flows are unknown: a developer plan whose delivery payment
-    was not published, or a delivery payment > 0 with no ``delivery_month``.
+    Returns ``None`` when ``plan.payments`` is ``None``, which means the payment table is
+    unknown (for example the delivery payment or its month was not published).
 
-    Raises ``ValueError`` if the plan is inconsistent (the frequency cannot be read from the
-    installment amounts, or the payments do not add up to ``total_paid_egp``). That is a bug
-    upstream, not a data gap, so it must fail loudly.
+    Raises ``ValueError`` if the rows do not add up to ``total_paid_egp``. PlanResult already
+    checks this when it is built; the check here catches objects that skipped validation.
     """
-    delivery = plan.delivery_payment_egp
-    if plan.plan_type == "developer" and delivery is None:
-        return None
-    if delivery is not None and delivery > 0 and plan.delivery_month is None:
+    if plan.payments is None:
         return None
 
-    flows: list[Cashflow] = [(0, plan.down_payment_egp)]
-
-    step = _installment_step(plan)
-    for k in range(1, plan.installment_count + 1):
-        flows.append((k * step, plan.installment_egp))
-
-    if delivery is not None and delivery > 0:
-        # delivery_month is not None here (checked above).
-        flows.append((plan.delivery_month, delivery))  # type: ignore[arg-type]
-
+    flows: list[Cashflow] = [
+        (p.month, p.amount_egp) for p in plan.payments if p.type != "maintenance"
+    ]
     paid = sum(amount for _, amount in flows)
     if not math.isclose(paid, plan.total_paid_egp, rel_tol=_REL_TOL, abs_tol=_ABS_TOL_EGP):
         raise ValueError(
@@ -122,11 +114,7 @@ def plan_npv(plan: PlanResult, annual_discount_rate_pct: float) -> PlanResult:
 
     flows = plan_cashflows(plan)
     if flows is None:
-        reason = (
-            WARNING_NPV_DELIVERY_UNKNOWN
-            if plan.delivery_payment_egp is None
-            else WARNING_NPV_DELIVERY_MONTH_UNKNOWN
-        )
+        reason = _unknown_reason(plan)
         if reason not in warnings:
             warnings.append(reason)
         data.update(npv_egp=None, annual_discount_rate_pct=None, warnings=warnings)
@@ -139,24 +127,14 @@ def plan_npv(plan: PlanResult, annual_discount_rate_pct: float) -> PlanResult:
     return PlanResult.model_validate(data)
 
 
-def _installment_step(plan: PlanResult) -> int:
-    """Months between installments: 1 (monthly) or 3 (quarterly).
-
-    PlanResult has no ``frequency`` field, so it is read from
-    ``monthly_equivalent_egp`` (= installment for monthly, installment / 3 for quarterly).
-    Bank plans are always monthly.
-    """
-    if plan.installment_count == 0 or plan.plan_type == "bank":
-        return 1
-    inst, eq = plan.installment_egp, plan.monthly_equivalent_egp
-    if math.isclose(eq, inst, rel_tol=_REL_TOL, abs_tol=_ABS_TOL_EGP):
-        return 1
-    if math.isclose(eq * 3, inst, rel_tol=_REL_TOL, abs_tol=_ABS_TOL_EGP):
-        return 3
-    raise ValueError(
-        f"cannot tell monthly from quarterly: installment_egp={inst!r}, "
-        f"monthly_equivalent_egp={eq!r}"
-    )
+def _unknown_reason(plan: PlanResult) -> str:
+    """Why the payment table is unknown, as a warning code."""
+    delivery = plan.delivery_payment_egp
+    if plan.plan_type == "developer" and delivery is None:
+        return WARNING_NPV_DELIVERY_UNKNOWN
+    if delivery is not None and delivery > 0 and plan.delivery_month is None:
+        return WARNING_NPV_DELIVERY_MONTH_UNKNOWN
+    return WARNING_NPV_PAYMENTS_UNKNOWN
 
 
 def _check_rate(annual_discount_rate_pct: float) -> None:
