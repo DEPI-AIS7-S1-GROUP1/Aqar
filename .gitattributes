@@ -1,0 +1,19 @@
+# S0-T2-1: force LF so init.sql and shell scripts work in Linux containers
+# even when the file was edited on Windows.
+* text=auto eol=lf
+
+*.sql text eol=lf
+*.sh  text eol=lf
+*.py  text eol=lf
+*.yml text eol=lf
+Dockerfile text eol=lf
+
+# Binary files: never touch line endings.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.xlsx binary
+*.docx binary
