@@ -5,3 +5,4 @@ pytest
 ruff
 langgraph
 openai
+numpy-financial
