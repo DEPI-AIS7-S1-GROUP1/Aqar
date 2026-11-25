@@ -25,6 +25,8 @@ _KAF = {"ک": "ك"}                                       # Persian kaf (keyboar
 _DIGITS = {
     **{chr(0x0660 + i): str(i) for i in range(10)},    # Arabic-Indic ٠١٢٣٤٥٦٧٨٩
     **{chr(0x06F0 + i): str(i) for i in range(10)},    # Eastern Arabic-Indic ۰۱۲۳۴۵۶۷۸۹
+    "\u066b": ".",                                     # Arabic decimal separator (٫): ٢٫٥ -> 2.5
+    "\u066c": ",",                                     # Arabic thousands separator (٬)
 }
 _REMOVE = {
     "\u0640": None,                                     # tatweel (ـ)
@@ -36,8 +38,9 @@ _REMOVE = {
 _TABLE = str.maketrans({**_ALEF, **_YA, **_TA_MARBUTA, **_KAF, **_DIGITS, **_REMOVE})
 
 _SPACES = re.compile(r"\s+")
-# Punctuation that only separates words in an area name: hyphens, dashes, dots, commas, quotes.
-_SEPARATORS = re.compile(r"[-\u2010-\u2015_.,\u060c'\"()/]+")
+# Punctuation that only separates words in an area name: hyphens, dashes, dots, commas,
+# quotes, and the question/exclamation/semicolon marks people type after a name ("التجمع؟").
+_SEPARATORS = re.compile(r"[-\u2010-\u2015_.,\u060c\u061b\u061f?!;:'\"()/]+")
 
 
 def normalize_text(text: str | None) -> str | None:
@@ -45,7 +48,8 @@ def normalize_text(text: str | None) -> str | None:
 
     * unify alef variants (أ إ آ ٱ -> ا), ya (ى ی -> ي) and ta marbuta (ة -> ه)
     * remove tashkeel (diacritics), tatweel and invisible direction marks
-    * convert Arabic-Indic digits (٠-٩ and ۰-۹) to 0-9
+    * convert Arabic-Indic digits (٠-٩ and ۰-۹) to 0-9, and the Arabic decimal and
+      thousands separators (٫ ٬) to ``.`` and ``,``
     * collapse all whitespace to single spaces and trim
 
     ``None`` stays ``None``. Latin letters are not lowercased here.
