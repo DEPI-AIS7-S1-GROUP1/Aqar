@@ -5,4 +5,10 @@ pytest
 ruff
 langgraph
 openai
+<<<<<<< HEAD
 numpy-financial
+=======
+alembic
+sqlalchemy
+psycopg[binary]
+>>>>>>> 3125cdc (S1-T2-1 add Alembic migration for developers, listings and payment_plans)
