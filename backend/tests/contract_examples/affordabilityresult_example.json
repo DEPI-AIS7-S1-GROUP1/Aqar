@@ -1,0 +1,14 @@
+{
+  "listing_id": "lst_example_001",
+  "plan_id": "plan_001",
+  "status": "tight",
+  "reason": "Down payment is covered, but the monthly installment is above the stated capacity.",
+  "down_payment_required_egp": 240000.0,
+  "down_payment_available_egp": 300000.0,
+  "down_payment_gap_egp": -60000.0,
+  "monthly_required_egp": 20000.0,
+  "monthly_capacity_egp": 18000.0,
+  "monthly_gap_egp": 2000.0,
+  "flags": ["delivery_payment"],
+  "missing_fields": []
+}
