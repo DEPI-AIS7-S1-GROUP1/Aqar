@@ -1,0 +1,41 @@
+{
+  "lead_id": "lead_demo_001",
+  "trigger": "visit_or_reserve",
+  "band": "hot",
+  "score": 74,
+  "reasons": [
+    "budget_confirmed"
+  ],
+  "confirmed": {
+    "areas": [
+      "new_cairo"
+    ],
+    "down_payment_available_egp": 500000.0,
+    "monthly_capacity_egp": 40000.0,
+    "timeline": "3-12m",
+    "purpose": null
+  },
+  "unconfirmed": [
+    "purpose",
+    "bedrooms_min"
+  ],
+  "matched_units": [
+    {
+      "listing_id": "lst_demo_001",
+      "plan_id": "plan_demo_001",
+      "affordability": "tight",
+      "liked": true
+    },
+    {
+      "listing_id": "lst_demo_002",
+      "plan_id": "plan_demo_002",
+      "affordability": "unknown",
+      "liked": false
+    }
+  ],
+  "open_questions": [
+    "هل العميل محتاج تشطيب كامل؟"
+  ],
+  "summary_text": "عميل تجريبي بيدور على شقة في القاهرة الجديدة للسكن. المقدم والقسط الشهري متأكدين. عجبته وحدة واحدة وطلب معاد معاينة.",
+  "transcript_url": null
+}

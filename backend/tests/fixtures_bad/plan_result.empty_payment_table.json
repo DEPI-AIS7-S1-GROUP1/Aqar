@@ -1,0 +1,19 @@
+{
+  "listing_id": "lst_demo_002",
+  "plan_id": "plan_demo_002b",
+  "plan_type": "developer",
+  "price_egp": 3600000.0,
+  "down_payment_egp": 0.0,
+  "down_payment_pct": 0.0,
+  "delivery_payment_egp": 0.0,
+  "delivery_month": null,
+  "installment_count": 120,
+  "installment_egp": 30000.0,
+  "monthly_equivalent_egp": 30000.0,
+  "total_paid_egp": 3600000.0,
+  "npv_egp": null,
+  "annual_discount_rate_pct": null,
+  "payments": [],
+  "missing_fields": [],
+  "warnings": []
+}

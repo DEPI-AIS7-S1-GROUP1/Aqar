@@ -1,0 +1,86 @@
+{
+  "conversation_id": "conv_demo_001",
+  "lead_id": "lead_demo_001",
+  "mode": "AI_ACTIVE",
+  "slots": {
+    "areas": {
+      "value": [
+        "new_cairo"
+      ],
+      "confirmed": true
+    },
+    "down_payment_available_egp": {
+      "value": 500000.0,
+      "confirmed": true
+    },
+    "monthly_capacity_egp": {
+      "value": 40000.0,
+      "confirmed": true
+    },
+    "budget_total_egp": {
+      "value": null,
+      "confirmed": false
+    },
+    "timeline": {
+      "value": "3-12m",
+      "confirmed": true
+    },
+    "purpose": {
+      "value": "live",
+      "confirmed": false
+    },
+    "unit_type": {
+      "value": "apartment",
+      "confirmed": true
+    },
+    "bedrooms_min": {
+      "value": 3,
+      "confirmed": false
+    }
+  },
+  "contact_consent": false,
+  "shown_listing_ids": [
+    "lst_demo_001",
+    "lst_demo_002"
+  ],
+  "feedback": [
+    {
+      "listing_id": "lst_demo_002",
+      "reaction": "rejected",
+      "reason": "عايز استلام أقرب"
+    }
+  ],
+  "affordability": [
+    {
+      "listing_id": "lst_demo_001",
+      "plan_id": "plan_demo_001",
+      "status": "tight",
+      "flags": [
+        "delivery_payment"
+      ]
+    },
+    {
+      "listing_id": "lst_demo_002",
+      "plan_id": "plan_demo_002",
+      "status": "unknown",
+      "flags": []
+    }
+  ],
+  "score": {
+    "value": 74,
+    "band": "hot",
+    "reasons": [
+      "budget_confirmed",
+      "timeline_3_12m"
+    ]
+  },
+  "handoff": {
+    "trigger": null,
+    "at": null
+  },
+  "failures": {
+    "extraction_retries": 0,
+    "guard_rejections": 0,
+    "off_topic_turns": 1
+  }
+}
