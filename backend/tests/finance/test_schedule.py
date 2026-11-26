@@ -4,7 +4,7 @@ Expected values are worked out by hand in the comments (README conventions), not
 """
 
 import sys
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 import pytest
@@ -205,7 +205,7 @@ def listing(**kw) -> Listing:
     base = {
         "listing_id": "NC-101",
         "source_url": "https://example.invalid/x",
-        "collected_at": datetime(2026, 11, 20, tzinfo=timezone.utc),
+        "collected_at": datetime(2026, 11, 20, tzinfo=UTC),
         "collected_by": "t",
         "area": "new_cairo",
         "developer": "Demo",
