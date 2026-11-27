@@ -1,0 +1,17 @@
+[
+  {"question": "الشيخ زايد مناسبة للعائلات؟", "expected_doc_id": "areas/sheikh_zayed"},
+  {"question": "إيه أهم المدارس والمستشفيات في التجمع؟", "expected_doc_id": "areas/new_cairo"},
+  {"question": "العاصمة الإدارية بعيدة عن القاهرة قد إيه؟", "expected_doc_id": "areas/new_capital"},
+  {"question": "المواصلات في 6 أكتوبر عاملة إزاي؟", "expected_doc_id": "areas/october_6"},
+  {"question": "مستقبل سيتي فيها خدمات ولا لسه؟", "expected_doc_id": "areas/mostakbal_city"},
+  {"question": "السكن على كورنيش المعادي شكله إيه؟", "expected_doc_id": "areas/maadi"},
+  {"question": "سوديك شركة كبيرة؟ عملت مشروعات إيه قبل كده؟", "expected_doc_id": "developers/sodic"},
+  {"question": "بالم هيلز بتسلم في معادها؟", "expected_doc_id": "developers/palm_hills"},
+  {"question": "مين هي هايد بارك للتطوير العقاري؟", "expected_doc_id": "developers/hyde_park"},
+  {"question": "ماونتن فيو خطط السداد عندهم عاملة إزاي؟", "expected_doc_id": "developers/mountain_view"},
+  {"question": "تطوير مصر عندها مشروعات فين؟", "expected_doc_id": "developers/tatweer_misr"},
+  {"question": "سيتي إيدج تبع الحكومة؟", "expected_doc_id": "developers/city_edge"},
+  {"question": "أوراسكوم للتنمية بتعمل إيه في أكتوبر؟", "expected_doc_id": "developers/orascom"},
+  {"question": "طلعت مصطفى سلمت مدينتي في معادها؟", "expected_doc_id": "developers/tmg"},
+  {"question": "Is Sheikh Zayed close to the Grand Egyptian Museum?", "expected_doc_id": "areas/sheikh_zayed"}
+]
