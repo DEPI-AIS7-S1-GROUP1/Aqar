@@ -27,7 +27,7 @@ sources:
 ## الخدمات
 
 قريبة من الجامعة الأمريكية بالقاهرة ومن شارع التسعين. [مدار: Mostakbal City](https://www.midar.org/cities/mostakbal-city/)
-المدينة لسه بتكبر، فلو حد عايز مدرسة أو مستشفى معين قريب من الوحدة، يتأكد مع البروكر. [Aqarmap: Mostakbal City](https://aqarmap.com.eg/en/advice/mostakbal-city/)
+المدينة لسه بتكبر، فلو محتاج مدرسة أو مستشفى معين قريب من الوحدة، اسأل المستشار بتاعنا. [Aqarmap: Mostakbal City](https://aqarmap.com.eg/en/advice/mostakbal-city/)
 
 ## المواصلات
 
@@ -37,4 +37,4 @@ sources:
 ## مناسبة لمين؟
 
 مناسبة للي عايز يبقى قريب من التجمع والعاصمة الإدارية في نفس الوقت، لأنها في النص بينهم. [بوابة العقارات: Mostakbal City](https://blogs.realestate.gov.eg/?p=94149)
-بما إنها مدينة جديدة لسه بتستقبل سكان، العميل اللي عايز يسكن على طول يتأكد من ميعاد استلام المشروع نفسه. [Aqarmap: Mostakbal City](https://aqarmap.com.eg/en/advice/mostakbal-city/)
+بما إنها مدينة جديدة لسه بتستقبل سكان، لو عايز تسكن على طول اتأكد من ميعاد استلام المشروع نفسه. [Aqarmap: Mostakbal City](https://aqarmap.com.eg/en/advice/mostakbal-city/)

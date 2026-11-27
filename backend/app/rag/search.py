@@ -51,6 +51,21 @@ class Rag:
         return [h for h in hits if h.score >= self.min_score]
 
 
+def sources_for(hits: list[RagHit]) -> list[dict[str, str]]:
+    """The chips for a chat reply: one ``{title, url}`` per distinct source, best hit first.
+
+    The agent puts this list in ``ChatMessage.sources`` next to the answer it wrote from ``hits``.
+    """
+    seen: set[str] = set()
+    out: list[dict[str, str]] = []
+    for h in hits:
+        if h.source_url in seen:
+            continue
+        seen.add(h.source_url)
+        out.append({"title": h.source_title or h.title or h.source_url, "url": h.source_url})
+    return out
+
+
 def build_memory_index(root: Path = DOCS_ROOT, embedder: Embedder | None = None,
                        *, include_drafts: bool = False) -> InMemoryStore:
     embedder = embedder or HashEmbedder()
@@ -66,7 +81,7 @@ def build_memory_index(root: Path = DOCS_ROOT, embedder: Embedder | None = None,
 
 @lru_cache(maxsize=1)
 def get_rag() -> Rag:
-    min_score = float(os.getenv("RAG_MIN_SCORE", "0.0"))
+    min_score = float(os.getenv("RAG_MIN_SCORE") or 0.0)  # empty in .env = keep all hits
     if os.getenv("USE_REAL_RAG") == "1":
         return Rag(PgVectorStore(), GeminiEmbedder(), min_score=min_score)
     embedder = HashEmbedder()

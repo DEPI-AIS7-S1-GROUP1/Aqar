@@ -11,7 +11,8 @@ if str(BACKEND) not in sys.path:
 
 from app.rag.docs import DocError, chunk_doc, load_docs, parse_front_matter
 from app.rag.embeddings import EMBED_DIM, HashEmbedder, normalise
-from app.rag.search import Rag, build_memory_index
+from app.rag.models import RagHit
+from app.rag.search import Rag, build_memory_index, get_rag, sources_for
 
 ZAYED = """---
 doc_type: area_guide
@@ -186,3 +187,23 @@ def test_min_score_drops_weak_hits(docs_root):
     emb = HashEmbedder()
     rag = Rag(build_memory_index(docs_root, emb), emb, min_score=0.99)
     assert rag.search("سؤال عن حاجة تانية خالص") == []
+
+
+def test_sources_for_dedupes_and_keeps_order():
+    a = RagHit(text="x", doc_id="d1", source_url="https://a.example", score=0.9, source_title="A")
+    b = RagHit(text="y", doc_id="d1", source_url="https://a.example", score=0.8, source_title="A")
+    c = RagHit(text="z", doc_id="d2", source_url="https://c.example", score=0.7, title="C doc")
+    assert sources_for([a, b, c]) == [
+        {"title": "A", "url": "https://a.example"},
+        {"title": "C doc", "url": "https://c.example"},
+    ]
+
+
+def test_empty_min_score_env_is_allowed(monkeypatch):
+    monkeypatch.setenv("RAG_MIN_SCORE", "")
+    monkeypatch.delenv("USE_REAL_RAG", raising=False)
+    get_rag.cache_clear()
+    try:
+        assert get_rag().min_score == 0.0
+    finally:
+        get_rag.cache_clear()

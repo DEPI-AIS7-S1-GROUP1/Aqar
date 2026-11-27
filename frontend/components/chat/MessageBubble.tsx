@@ -12,6 +12,7 @@ export interface MessageBubbleProps {
 
 export default function MessageBubble({ message, pending = false, failed = false, onRetry }: MessageBubbleProps) {
   const { role, text, cards, created_at } = message;
+  const sources = message.sources ?? [];
 
   if (role === "system") {
     return (
@@ -48,6 +49,26 @@ export default function MessageBubble({ message, pending = false, failed = false
           <div className="mt-3 grid gap-2.5 sm:grid-cols-2" dir="rtl">
             {cards.map((c) => (
               <UnitCard key={c.listing.listing_id} listing={c.listing} plan={c.plan} affordability={c.affordability} compact />
+            ))}
+          </div>
+        )}
+        {sources.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5" dir="rtl" aria-label="مصادر الإجابة">
+            {sources.map((src) => (
+              <a
+                key={src.url}
+                href={src.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={src.url}
+                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-paper/25 bg-paper/10 px-3 py-1 text-[11px] text-paper/85 hover:bg-paper hover:text-ink transition-colors"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5" />
+                  <path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5" />
+                </svg>
+                <span className="truncate">المصدر: {src.title}</span>
+              </a>
             ))}
           </div>
         )}
