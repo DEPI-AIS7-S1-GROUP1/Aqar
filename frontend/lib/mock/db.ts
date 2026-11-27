@@ -6,6 +6,7 @@ import type {
   Band,
   Listing,
   MessageRole,
+  SourceRef,
   Mode,
   Purpose,
   Role,
@@ -27,6 +28,7 @@ export interface StoredMessage {
   text: string;
   created_at: string;
   card_listing_ids: string[];
+  sources?: SourceRef[];
 }
 
 export interface MockSlots {

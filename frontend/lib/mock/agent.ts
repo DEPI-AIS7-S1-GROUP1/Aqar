@@ -1,10 +1,11 @@
 // DEMO-ONLY scripted assistant that behaves like the real LangGraph agent (Member 4)
 // closely enough to click through the whole flow without a backend.
 // Scoring follows the architecture table; numbers only come from the customer or the mock calculator.
-import type { AffordabilityStatus, Band } from "@/lib/types";
+import type { AffordabilityStatus, Band, SourceRef } from "@/lib/types";
 import { AREAS, areaLabel, formatEgp, TIMELINE_LABEL, PURPOSE_LABEL } from "@/lib/format";
 import { LISTINGS, type MockConversation, type MockSlots } from "./db";
 import { buildPlan, checkAffordability } from "./finance";
+import { answerFromGuides } from "./knowledge";
 
 export const GREETING =
   "أهلاً بيك في عقار! أنا مساعدك العقاري. هسألك كام سؤال بسيط عشان أرشحلك وحدات تقدر عليها فعلاً. بتدور على وحدة في أنهي منطقة؟";
@@ -76,7 +77,7 @@ const QUESTIONS: Record<Exclude<Pending, null>, string> = {
 };
 
 export interface TurnResult {
-  messages: { text: string; cards: string[] }[];
+  messages: { text: string; cards: string[]; sources?: SourceRef[] }[];
   handoffTrigger: string | null;
 }
 
@@ -143,6 +144,16 @@ export function runTurn(conv: MockConversation, userText: string): TurnResult {
     msgs.push({ text: HANDOFF_TEXT, cards: [] });
     rescore(conv);
     return { messages: msgs, handoffTrigger: trigger };
+  }
+
+  // a question about an area or a developer: answer from the guides (the RAG), with sources
+  const known = answerFromGuides(text, amounts.length > 0);
+  if (known) {
+    rescore(conv);
+    msgs.push({ text: known.text, cards: [], sources: known.sources });
+    const next = nextMissing(s);
+    if (next) msgs.push({ text: `${ack} ولو حابب أرشحلك وحدات: ${QUESTIONS[next].replace(/^تمام\.\s*/, "")}`.trim(), cards: [] });
+    return { messages: msgs, handoffTrigger: null };
   }
 
   const hasCore = Boolean(s.areas && s.down_payment_available_egp !== null && s.monthly_capacity_egp !== null);

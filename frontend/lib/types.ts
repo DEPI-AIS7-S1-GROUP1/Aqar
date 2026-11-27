@@ -143,12 +143,20 @@ export interface CompareResult {
 }
 
 // ---------- Conversations ----------
+/** Where an AI answer came from (a guide section). Shown as a chip under the message. */
+export interface SourceRef {
+  title: string;
+  url: string;
+}
+
 export interface ChatMessage {
   message_id: string;
   role: MessageRole;
   text: string;
   created_at: string;
   cards: UnitCard[];
+  /** Optional (contracts-v2 addition): sources of a RAG answer. Absent or null = no chips. */
+  sources?: SourceRef[] | null;
 }
 
 export interface ConversationView {

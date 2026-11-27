@@ -81,6 +81,7 @@ function toChat(conv: MockConversation, m: StoredMessage): ChatMessage {
     text: m.text,
     created_at: m.created_at,
     cards: m.card_listing_ids.map((id) => cardFor(conv, id)).filter((c): c is UnitCard => c !== null),
+    sources: m.sources?.length ? m.sources : null,
   };
 }
 
@@ -93,13 +94,21 @@ function view(conv: MockConversation, after: string | null = null): Conversation
   return { conversation_id: conv.conversation_id, mode: conv.mode, messages: msgs.map((m) => toChat(conv, m)) };
 }
 
-function addMsg(state: MockState, conv: MockConversation, role: StoredMessage["role"], text: string, cards: string[] = []) {
+function addMsg(
+  state: MockState,
+  conv: MockConversation,
+  role: StoredMessage["role"],
+  text: string,
+  cards: string[] = [],
+  sources: StoredMessage["sources"] = undefined,
+) {
   const m: StoredMessage = {
     message_id: nextId(state, "m"),
     role,
     text,
     created_at: new Date().toISOString(),
     card_listing_ids: cards,
+    ...(sources?.length ? { sources } : {}),
   };
   conv.messages.push(m);
   conv.updated_at = m.created_at;
@@ -135,7 +144,7 @@ function customerTurn(state: MockState, conv: MockConversation, text: string) {
   addMsg(state, conv, "user", text);
   if (conv.mode !== "AI_ACTIVE") return; // AI stays silent after handoff/takeover
   const res = runTurn(conv, text);
-  for (const m of res.messages) addMsg(state, conv, "ai", m.text, m.cards);
+  for (const m of res.messages) addMsg(state, conv, "ai", m.text, m.cards, m.sources);
   if (res.handoffTrigger) {
     conv.mode = "HANDOFF_PENDING";
     conv.trigger = res.handoffTrigger;
