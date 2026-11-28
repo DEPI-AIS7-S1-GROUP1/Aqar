@@ -12,6 +12,7 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -226,8 +227,11 @@ def register_exception_handlers(app: FastAPI) -> None:
     Args:
         app: FastAPI application instance
     """
-    # HTTPException handler
+    # FastAPI HTTPException handler
     app.add_exception_handler(HTTPException, http_exception_handler)
+    
+    # Starlette HTTPException handler (for 404s on unknown routes)
+    app.add_exception_handler(StarletteHTTPException, http_exception_handler)
     
     # Validation error handler
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
