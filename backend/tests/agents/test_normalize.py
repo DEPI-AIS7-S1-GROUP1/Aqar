@@ -88,6 +88,13 @@ SAME_AREA = {
         "الساحل الشمالي – رأس الحكمة", "الساحل الشمالى - راس الحكمه", "رأس الحكمة",
         "راس الحكمه", "الساحل", "Ras El Hekma", "North Coast", "Sahel",
     ],
+    "maadi": [
+        "المعادي", "معادي", "المعادى", "معادى",
+    "المعادي الجديدة", "المعادي الجديده", "دجلة المعادي",
+    "سرايات المعادي", "كورنيش المعادي", "حي المعادي",
+    "maadi", "el maadi", "al maadi", "elmaadi", "new maadi",
+    "maadi degla", "degla maadi", "sarayat el maadi", "sarayat al maadi",
+    "maadi corniche", "maadi cornish", "hay el maadi"]
 }
 
 

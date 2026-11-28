@@ -174,16 +174,21 @@ class Listing(BaseModel):
     collected_by: str
     verified_by: str | None = None
     area: str
-    developer: str
+    developer: str | None = None
     price_egp: float
     area_sqm: float
     delivery_date: date | None = None
-    down_payment_pct: float
-    years: int
-    frequency: Literal["monthly", "quarterly"]
+    down_payment_pct: float | None = None
+    years: int | None = None
+    frequency: Literal["monthly", "quarterly"] | None = None
     delivery_payment_pct: float | None = None
     maintenance_pct: float | None = None
     notes: str | None = None
+    title: str | None = None
+    unit_type: str | None = None
+    bedrooms: int | None = None
+    image_urls: list[str] | None = None
+    image_credit: str | None = None
 
 class PaymentPlan(BaseModel):
     """One developer payment plan as published by the source. Extended in S0-T3-4.
@@ -231,6 +236,12 @@ class SearchQuery(BaseModel):
 class SearchResult(BaseModel):
     total: int
     results: list[Listing]
+
+class ImportReport(BaseModel):
+    accepted: int
+    rejected: int
+    errors: list[str]                  # "row 7: price_egp missing"
+    data_version: int
 
 
 # ---- calculator and affordability result models (Member 4) ----
