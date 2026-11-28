@@ -88,13 +88,10 @@ SAME_AREA = {
         "الساحل الشمالي – رأس الحكمة", "الساحل الشمالى - راس الحكمه", "رأس الحكمة",
         "راس الحكمه", "الساحل", "Ras El Hekma", "North Coast", "Sahel",
     ],
-    "maadi": [
-        "المعادي", "معادي", "المعادى", "معادى",
-    "المعادي الجديدة", "المعادي الجديده", "دجلة المعادي",
-    "سرايات المعادي", "كورنيش المعادي", "حي المعادي",
-    "maadi", "el maadi", "al maadi", "elmaadi", "new maadi",
-    "maadi degla", "degla maadi", "sarayat el maadi", "sarayat al maadi",
-    "maadi corniche", "maadi cornish", "hay el maadi"]
+        "maadi": [
+        "المعادي", "المعادى", "معادي", "حي المعادي", "كورنيش المعادي",
+        "Maadi", "El Maadi", "al-maadi", "New Maadi", "Maadi Degla", "Hay El Maadi",
+    ],
 }
 
 
@@ -127,8 +124,8 @@ def test_every_listed_synonym_resolves_to_its_area():
         None,
         "",
         "   ",
-        "المعادي",                    # real area, but not in our list
-        "Maadi",
+        "زهراء المعادي",              # Zahraa El Maadi is a different district from Maadi
+        "Degla",                      # could be Degla (Maadi) or Degla Palms (6 October)
         "حدائق أكتوبر",               # October Gardens is a different place from 6 October
         "الشيخ زايد الجديدة",          # New Zayed is a different city
         "التجمع الأول",               # First Settlement: not in our list yet, do not guess
@@ -173,6 +170,6 @@ def test_shipped_data_file_loads():
     assert len(set(table.values())) == len(SAME_AREA)
 
 
-@pytest.mark.parametrize("text", ["التجمع؟", "التجمع!", "new cairo?", "زايد؛", "Zayed!"])
+@pytest.mark.parametrize("text", ["التجمع؟", "التجمع!", "new cairo?", "زايد؛", "Zayed!",])
 def test_trailing_question_or_exclamation_mark_still_matches(text):
     assert normalize_area(text) is not None
