@@ -81,7 +81,7 @@ def _create_error_response(
         request_id: Request tracking ID
         
     Returns:
-        JSONResponse with standard error envelope
+        JSONResponse with standard error envelope and X-Request-ID header
     """
     error_code = STATUS_CODE_TO_ERROR_CODE.get(status_code, "internal_error")
     
@@ -93,10 +93,15 @@ def _create_error_response(
         )
     )
     
-    return JSONResponse(
+    json_response = JSONResponse(
         status_code=status_code,
         content=response.model_dump(),
     )
+    
+    # Add X-Request-ID header to error responses
+    json_response.headers["X-Request-ID"] = request_id
+    
+    return json_response
 
 
 async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
