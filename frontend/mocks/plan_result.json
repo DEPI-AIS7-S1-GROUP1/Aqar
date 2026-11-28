@@ -1,0 +1,190 @@
+{
+  "listing_id": "lst_demo_001",
+  "plan_id": "plan_demo_001",
+  "plan_type": "developer",
+  "price_egp": 4800000.0,
+  "down_payment_egp": 480000.0,
+  "down_payment_pct": 10.0,
+  "delivery_payment_egp": 480000.0,
+  "delivery_month": 36,
+  "installment_count": 32,
+  "installment_egp": 120000.0,
+  "monthly_equivalent_egp": 40000.0,
+  "total_paid_egp": 4800000.0,
+  "npv_egp": null,
+  "annual_discount_rate_pct": null,
+  "payments": [
+    {
+      "month": 0,
+      "amount_egp": 480000.0,
+      "type": "down_payment"
+    },
+    {
+      "month": 3,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 6,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 9,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 12,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 15,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 18,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 21,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 24,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 27,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 30,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 33,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 36,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 36,
+      "amount_egp": 480000.0,
+      "type": "delivery"
+    },
+    {
+      "month": 39,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 42,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 45,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 48,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 51,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 54,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 57,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 60,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 63,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 66,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 69,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 72,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 75,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 78,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 81,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 84,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 87,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 90,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 93,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    },
+    {
+      "month": 96,
+      "amount_egp": 120000.0,
+      "type": "installment"
+    }
+  ],
+  "missing_fields": [],
+  "warnings": []
+}

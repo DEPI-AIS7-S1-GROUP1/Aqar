@@ -1,0 +1,11 @@
+{
+  "plan_id": "plan_demo_002",
+  "down_payment_egp": 0.0,
+  "down_payment_pct": 0.0,
+  "down_payment_source": "pct",
+  "years": 10,
+  "frequency": "monthly",
+  "delivery_payment_pct": null,
+  "delivery_month": null,
+  "maintenance_pct": null
+}

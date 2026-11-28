@@ -1,0 +1,5 @@
+{
+  "_comment": "Affordability thresholds (architecture doc). tight_limit_pct: how far above the customer's limit a plan can be and still count as 'tight' instead of 'not_fit'. Tune after talking to brokers.",
+  "tight_limit_pct": 15,
+  "uncovered_delivery_is_tight": true
+}

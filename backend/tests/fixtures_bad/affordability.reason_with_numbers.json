@@ -1,0 +1,16 @@
+{
+  "listing_id": "lst_demo_001",
+  "plan_id": "plan_demo_001",
+  "status": "tight",
+  "reason": "القسط أعلى من القدرة بـ ٢٠٠٠ جنيه",
+  "down_payment_required_egp": 480000.0,
+  "down_payment_available_egp": 500000.0,
+  "down_payment_gap_egp": -20000.0,
+  "monthly_required_egp": 40000.0,
+  "monthly_capacity_egp": 40000.0,
+  "monthly_gap_egp": 0.0,
+  "flags": [
+    "delivery_payment"
+  ],
+  "missing_fields": []
+}

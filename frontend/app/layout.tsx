@@ -20,8 +20,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl">
-      <body className={`${notoKufiArabic.className} antialiased`}>
-        {children}
+      <body className={`${notoKufiArabic.className} antialiased bg-ink`}>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:z-50 focus:bg-paper focus:text-ink focus:px-4 focus:py-2 focus:rounded-full"
+        >
+          تخطي للمحتوى
+        </a>
+        <div id="main-content">{children}</div>
       </body>
     </html>
   );

@@ -6,3 +6,7 @@ pytest
 ruff
 langgraph
 openai
+numpy-financial
+alembic
+sqlalchemy
+psycopg[binary]

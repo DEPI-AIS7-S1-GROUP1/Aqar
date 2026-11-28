@@ -1,0 +1,16 @@
+{
+  "listing_id": "lst_demo_002",
+  "plan_id": "plan_demo_002",
+  "status": "unknown",
+  "reason": "محتاجين نعرف القسط الشهري اللي يناسب العميل.",
+  "down_payment_required_egp": 0.0,
+  "down_payment_available_egp": 0.0,
+  "down_payment_gap_egp": 0.0,
+  "monthly_required_egp": 30000.0,
+  "monthly_capacity_egp": null,
+  "monthly_gap_egp": 0.0,
+  "flags": [],
+  "missing_fields": [
+    "monthly_capacity_egp"
+  ]
+}
