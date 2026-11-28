@@ -14,20 +14,20 @@ branch_labels = None
 depends_on = None
 
 COLUMNS = {
-    "developer": sa.Text,
+    "developer": sa.Text(),
     "area_sqm": sa.Numeric(10, 2),
     "down_payment_pct": sa.Numeric(6, 3),
-    "years": sa.Integer,
-    "frequency": sa.Text,
+    "years": sa.Integer(),
+    "frequency": sa.Text(),
 }
 
 
 def upgrade() -> None:
     for name, column_type in COLUMNS.items():
-        op.alter_column("listings", name, existing_type=column_type(), nullable=True)
+        op.alter_column("listings", name, existing_type=column_type, nullable=True)
 
 
 def downgrade() -> None:
     # Fails if a row already has NULL here. Delete or fill those rows first.
     for name, column_type in COLUMNS.items():
-        op.alter_column("listings", name, existing_type=column_type(), nullable=False)
+        op.alter_column("listings", name, existing_type=column_type, nullable=False)
