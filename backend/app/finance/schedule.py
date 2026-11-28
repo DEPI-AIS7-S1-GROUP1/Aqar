@@ -226,6 +226,11 @@ def plan_from_listing(listing: Listing, *, as_of: date | None = None) -> Payment
     ``delivery_month`` is counted from ``as_of`` (the contract date) to ``listing.delivery_date``.
     Without ``as_of`` or without a delivery date it stays unknown (None); nothing is guessed.
     """
+    if listing.years is None or listing.frequency is None or listing.down_payment_pct is None:
+        raise ValueError(
+            f"listing {listing.listing_id} has no full payment plan "
+            "(years, frequency or down_payment_pct unknown)"
+        )
     delivery_month = None
     if as_of is not None and listing.delivery_date is not None:
         delivery_month = months_between(as_of, listing.delivery_date)
