@@ -9,3 +9,4 @@ numpy-financial
 alembic
 sqlalchemy
 psycopg[binary]
+openpyxl

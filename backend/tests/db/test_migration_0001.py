@@ -27,6 +27,10 @@ from app.contracts import Listing, PaymentPlan
 MIGRATION = BACKEND / "app/db/migrations/versions/0001_listings_developers_payment_plans.py"
 
 # Columns that are in the database but not in the contract, on purpose.
+# Made nullable later by migration 0006. In 0001 they are still NOT NULL.
+NULLABLE_SINCE_0006 = {"developer", "area_sqm", "down_payment_pct", "years", "frequency"}
+# contracts-v2 fields added by migration 0003 (tested in test_migration_0003.py).
+LISTING_FIELDS_FROM_0003 = {"title", "unit_type", "bedrooms", "image_urls", "image_credit"}
 LISTING_HELPERS = {"missing_fields", "data_version"}
 PLAN_HELPERS = {"listing_id"}          # the reference to listings (task sheet step 2)
 
@@ -61,17 +65,17 @@ def recorded() -> _Recorder:
     return rec
 
 
-def _check_against(model, columns: dict[str, sa.Column], helpers: set[str], keys: set[str]):
-    fields = model.model_fields
+def _check_against(model, columns, helpers, keys):
+    fields = {n: f for n, f in model.model_fields.items() if n not in LISTING_FIELDS_FROM_0003}
     assert set(columns) - helpers == set(fields), "columns must match the contract field by field"
     for name, info in fields.items():
         col = columns[name]
         if name in keys:
             assert not col.nullable      # primary key, see migration comment
             continue
-        assert col.nullable == (not info.is_required()), f"{name}: nullable must follow the contract"
+        if name not in NULLABLE_SINCE_0006:
+            assert col.nullable == (not info.is_required()), f"{name}: nullable must follow the contract"
         assert col.server_default is None, f"{name}: no database default (never 0 for unknown)"
-
 
 @NEEDS_S0_T3_4
 def test_listings_match_listing_contract(recorded):
